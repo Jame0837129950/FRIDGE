@@ -2,14 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:productexpire/states/create_account.dart';
 import 'package:productexpire/utility/my_constant.dart';
+import 'package:productexpire/utility/my_dialog.dart';
 import 'package:productexpire/widgets/widget_button.dart';
 import 'package:productexpire/widgets/widget_form.dart';
 import 'package:productexpire/widgets/widget_image.dart';
 import 'package:productexpire/widgets/widget_text.dart';
 import 'package:productexpire/widgets/widget_text_button.dart';
 
-class Authen extends StatelessWidget {
+class Authen extends StatefulWidget {
   const Authen({super.key});
+
+  @override
+  State<Authen> createState() => _AuthenState();
+}
+
+class _AuthenState extends State<Authen> {
+  String? email, password;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +57,12 @@ class Authen extends StatelessWidget {
           width: 250,
           child: WidgetButton(
             label: 'Login',
-            pressFunc: () {},
+            pressFunc: () {
+              if ((email?.isEmpty ?? true) || (password?.isEmpty ?? true)) {
+                MyDialog(context: context).normalDialog(
+                    title: 'Have Space ?', subTitle: 'Please Fill Every Blank');
+              } else {}
+            },
           ),
         ),
       ],
@@ -67,7 +80,9 @@ class Authen extends StatelessWidget {
             obsecu: true,
             hint: 'Password :',
             iconData: Icons.lock,
-            changeFunc: (p0) {},
+            changeFunc: (p0) {
+              password = p0.trim();
+            },
           ),
         ),
       ],
@@ -84,7 +99,9 @@ class Authen extends StatelessWidget {
           child: WidgetForm(
             hint: 'Email :',
             iconData: Icons.mail,
-            changeFunc: (p0) {},
+            changeFunc: (p0) {
+              email = p0.trim();
+            },
           ),
         ),
       ],

@@ -1,4 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:productexpire/models/user_model.dart';
 import 'package:productexpire/utility/my_constant.dart';
 import 'package:productexpire/utility/my_dialog.dart';
 import 'package:productexpire/widgets/widget_button.dart';
@@ -79,6 +84,28 @@ class _CreateAccountState extends State<CreateAccount> {
       ),
     );
   }
-  
-  void processCreateAccount() {}
+
+  Future<void> processCreateAccount() async {
+    await FirebaseAuth.instance
+        .createUserWithEmailAndPassword(email: email!, password: password!)
+        .then((value) async {
+      String uid = value.user!.uid;
+      print('uid ==> $uid');
+
+      FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+      String? token = await firebaseMessaging.getToken();
+      print('token ==> $token');
+
+      UserModel userModel = UserModel(
+          name: name!, token: token!, email: email!, password: password!);
+      await FirebaseFirestore.instance
+          .collection('user')
+          .doc(uid)
+          .set(userModel.toMap())
+          .then((value) => Get.back());
+    }).catchError((onError) {
+      MyDialog(context: context)
+          .normalDialog(title: onError.code, subTitle: onError.message);
+    });
+  }
 }
