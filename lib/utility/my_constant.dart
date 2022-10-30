@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class MyConstant {
+
+  static int hour = 16;
+  static int mimus = 0;
   static Color dark = const Color.fromARGB(255, 21, 1, 135);
 static Color active = Colors.pink;
 

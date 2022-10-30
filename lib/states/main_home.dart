@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:productexpire/controllors/app_controller.dart';
+import 'package:productexpire/models/product_model.dart';
 import 'package:productexpire/utility/my_constant.dart';
+import 'package:productexpire/utility/my_dialog.dart';
 import 'package:productexpire/widgets/widget_history.dart';
 import 'package:productexpire/widgets/widget_image.dart';
 import 'package:productexpire/widgets/widget_list_product.dart';
@@ -26,6 +29,13 @@ class _MainHomeState extends State<MainHome> {
     const WidgetListProduct(),
     const WidgetHistory(),
   ];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkExpireDate();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,5 +103,57 @@ class _MainHomeState extends State<MainHome> {
         ],
       ),
     );
+  }
+
+  Future<void> checkExpireDate() async {
+    DateTime currentDateTime = DateTime.now();
+    currentDateTime = DateTime(currentDateTime.year, currentDateTime.month,
+        currentDateTime.day, MyConstant.hour, MyConstant.mimus);
+
+    var user = FirebaseAuth.instance.currentUser;
+
+    var productModels = <ProductModel>[];
+
+    await FirebaseFirestore.instance
+        .collection('user')
+        .doc(user!.uid)
+        .collection('product')
+        .orderBy('timeExpire')
+        .get()
+        .then((value) async {
+      if (value.docs.isNotEmpty) {
+        for (var element in value.docs) {
+          ProductModel model = ProductModel.fromMap(element.data());
+          productModels.add(model);
+        } // for
+
+        DateTime expireDatetime = productModels[0].timeExpire.toDate();
+        expireDatetime = DateTime(expireDatetime.year, expireDatetime.month,
+            expireDatetime.day, MyConstant.hour, MyConstant.mimus);
+        print('currentDateTime ==> $currentDateTime');
+        print('expireDatetime ==> $expireDatetime');
+
+        if (expireDatetime.isAfter(currentDateTime)) {
+          print('ยังไม่หมดอายุ');
+        } else {
+          print('หมดอายุแล้ว');
+
+          DateTime dateTime = DateTime.now();
+          DateTime alertDatetime = DateTime(dateTime.year, dateTime.month,
+              dateTime.day, MyConstant.hour, MyConstant.mimus);
+
+          await Future.delayed(
+            const Duration(hours: 1),
+            () {
+              if (alertDatetime.isAfter(dateTime)) {
+                MyDialog(context: context).normalDialog(
+                    title: 'Have Product Expire',
+                    subTitle: 'Some Product Expire');
+              }
+            },
+          );
+        }
+      } // if
+    });
   }
 }
