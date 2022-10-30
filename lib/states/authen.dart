@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:productexpire/states/create_account.dart';
+import 'package:productexpire/states/main_home.dart';
 import 'package:productexpire/utility/my_constant.dart';
 import 'package:productexpire/utility/my_dialog.dart';
 import 'package:productexpire/widgets/widget_button.dart';
@@ -61,7 +65,9 @@ class _AuthenState extends State<Authen> {
               if ((email?.isEmpty ?? true) || (password?.isEmpty ?? true)) {
                 MyDialog(context: context).normalDialog(
                     title: 'Have Space ?', subTitle: 'Please Fill Every Blank');
-              } else {}
+              } else {
+                processCheckLogin();
+              }
             },
           ),
         ),
@@ -137,5 +143,17 @@ class _AuthenState extends State<Authen> {
         ],
       ),
     );
+  }
+
+  Future<void> processCheckLogin() async {
+    await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email!, password: password!)
+        .then((value) async {
+          Get.off(const MainHome());
+        })
+        .catchError((onError) {
+      MyDialog(context: context)
+          .normalDialog(title: onError.code, subTitle: onError.message);
+    });
   }
 }
