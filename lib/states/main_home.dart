@@ -6,6 +6,7 @@ import 'package:productexpire/controllors/app_controller.dart';
 import 'package:productexpire/models/product_model.dart';
 import 'package:productexpire/utility/my_constant.dart';
 import 'package:productexpire/utility/my_dialog.dart';
+import 'package:productexpire/utility/my_service.dart';
 import 'package:productexpire/widgets/widget_history.dart';
 import 'package:productexpire/widgets/widget_image.dart';
 import 'package:productexpire/widgets/widget_list_product.dart';
@@ -35,6 +36,9 @@ class _MainHomeState extends State<MainHome> {
     // TODO: implement initState
     super.initState();
     checkExpireDate();
+    MyService().readAllProductExpire().then((value) {
+      alertProductExpire();
+    });
   }
 
   @override
@@ -136,24 +140,44 @@ class _MainHomeState extends State<MainHome> {
         if (expireDatetime.isAfter(currentDateTime)) {
           print('ยังไม่หมดอายุ');
         } else {
-          print('หมดอายุแล้ว');
-
-          DateTime dateTime = DateTime.now();
-          DateTime alertDatetime = DateTime(dateTime.year, dateTime.month,
-              dateTime.day, MyConstant.hour, MyConstant.mimus);
-
-          await Future.delayed(
-            const Duration(hours: 1),
-            () {
-              if (alertDatetime.isAfter(dateTime)) {
-                MyDialog(context: context).normalDialog(
-                    title: 'Have Product Expire',
-                    subTitle: 'Some Product Expire');
-              }
-            },
-          );
+          
         }
       } // if
     });
   }
+
+Future<void> alertProductExpire() async {
+  print('##11feb หมดอายุแล้ว');
+
+  AppController appController = Get.put(AppController());
+
+  if (appController.nonExprieProductModels.isNotEmpty) {
+DateTime nearExpireDateTime = 
+appController.nonExprieProductModels[0].timeExpire.toDate();
+print('##11feb หมดอายุแล้ว $nearExpireDateTime'); 
+
+nearExpireDateTime = DateTime(nearExpireDateTime.year, nearExpireDateTime.month, (nearExpireDateTime.day-1));
+
+ await Future.delayed(
+            nearExpireDateTime.difference(DateTime.now()),
+            () {
+              
+
+                MyDialog(context: context).normalDialog(
+                    title: 'Have Product Expire',
+                    subTitle: 'Some Product Expire');
+              
+            },
+          );
+
+  }
+
+          // DateTime dateTime = DateTime.now();
+          // DateTime alertDatetime = DateTime(dateTime.year, dateTime.month,
+          //     dateTime.day, MyConstant.hour, MyConstant.mimus);
+          
+}
+
+
+
 }

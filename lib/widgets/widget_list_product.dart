@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:productexpire/controllors/app_controller.dart';
 import 'package:productexpire/models/product_model.dart';
 import 'package:productexpire/states/add_product.dart';
 import 'package:productexpire/utility/my_constant.dart';
@@ -29,6 +30,7 @@ class _WidgetListProductState extends State<WidgetListProduct> {
   void initState() {
     super.initState();
     readAllProduct();
+    MyService().readAllProductExpire();
   }
 
   @override
@@ -39,87 +41,83 @@ class _WidgetListProductState extends State<WidgetListProduct> {
         height: boxConstraints.maxHeight,
         child: Stack(
           children: [
-            
-            load
-                ? const WidgetProcess()
-                : haveProduct!
-                    ? ListView.builder(
-                        itemCount: productModels.length,
-                        itemBuilder: (context, index) => Column(
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 4, horizontal: 8),
-                                  width: boxConstraints.maxWidth * 0.5,
-                                  height: boxConstraints.maxHeight * 0.4,
-                                  child: Image.network(
-                                    productModels[index].urlImage,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 4, horizontal: 8),
-                                  width: boxConstraints.maxWidth * 0.5,
-                                  height: boxConstraints.maxHeight * 0.4,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      WidgetText(
-                                        text: 'Expire Date :',
-                                        textStyle: MyConstant().h2Style(),
-                                      ),
-                                      WidgetText(
-                                        text: MyService().dateToString(
-                                            dateTime: productModels[index]
-                                                .timeExpire
-                                                .toDate()),
-                                        textStyle: MyConstant()
-                                            .h3Style(color: MyConstant.active),
-                                      ),
-                                      WidgetText(
-                                        text: 'Receive Date :',
-                                        textStyle: MyConstant().h2Style(),
-                                      ),
-                                      WidgetText(
-                                          text: MyService().dateToString(
-                                              dateTime: productModels[index]
-                                                  .timeReceive
-                                                  .toDate())),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Divider(color: MyConstant.dark,)
-                          ],
-                        ),
-                      )
-                    : Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const WidgetImage(
-                              path: 'images/list.png',
-                              size: 250,
-                            ),
-                            WidgetText(
-                              text: 'No Product',
-                              textStyle: MyConstant().h1Style(),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ButtonAddNewProduct(),
+            GetX(
+                init: AppController(),
+                builder: (AppController appController) {
+                  print(
+                      'nonExpireProductModels --> ${appController.nonExprieProductModels.length}');
+                  return appController.nonExprieProductModels.isEmpty
+                      ? const SizedBox()
+                      : ListView.builder( itemCount: appController.nonExprieProductModels.length,
+                          itemBuilder: (context, index) => displayProduct(
+                              boxConstraints: boxConstraints,
+                              index: index,
+                              appController: appController),
+                        );
+                }),
+            buttonAddNewProduct(),
           ],
         ),
       );
     });
   }
 
-  Positioned ButtonAddNewProduct() {
+  Column displayProduct(
+      {required BoxConstraints boxConstraints,
+      required int index,
+      required AppController appController}) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              width: boxConstraints.maxWidth * 0.5,
+              height: boxConstraints.maxHeight * 0.4,
+              child: Image.network(
+                appController.nonExprieProductModels[index].urlImage,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              width: boxConstraints.maxWidth * 0.5,
+              height: boxConstraints.maxHeight * 0.4,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  WidgetText(
+                    text: 'Expire Date :',
+                    textStyle: MyConstant().h2Style(),
+                  ),
+                  WidgetText(
+                    text: MyService().dateToString(
+                        dateTime: appController.nonExprieProductModels[index].timeExpire
+                            .toDate()),
+                    textStyle: MyConstant().h3Style(color: MyConstant.active),
+                  ),
+                  WidgetText(
+                    text: 'Receive Date :',
+                    textStyle: MyConstant().h2Style(),
+                  ),
+                  WidgetText(
+                      text: MyService().dateToString(
+                          dateTime: appController
+                              .nonExprieProductModels[index].timeReceive
+                              .toDate())),
+                ],
+              ),
+            ),
+          ],
+        ),
+        Divider(
+          color: MyConstant.dark,
+        )
+      ],
+    );
+  }
+
+  Positioned buttonAddNewProduct() {
     return Positioned(
       bottom: 36,
       right: 36,
@@ -127,7 +125,7 @@ class _WidgetListProductState extends State<WidgetListProduct> {
         iconData: Icons.add_box,
         pressFunc: () {
           Get.to(AddProduct(docIdUser: user!.uid))?.then((value) {
-            readAllProduct();
+           MyService().readAllProductExpire();
           });
         },
         size: 48,
