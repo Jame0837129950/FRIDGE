@@ -41,7 +41,10 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       getPages: getPages,
       initialRoute: firstState,
-      theme: ThemeData(primarySwatch: Colors.red),
+      theme: ThemeData(
+        // primarySwatch: Colors.red,
+        useMaterial3: true,
+      ),
     );
   }
 }

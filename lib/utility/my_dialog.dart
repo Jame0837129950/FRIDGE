@@ -11,7 +11,7 @@ class MyDialog {
     required this.context,
   });
 
-  void normalDialog({required String title, required String subTitle}) {
+  void normalDialog({required String title, required String subTitle, Widget? actionWidget}) {
     Get.dialog(
       AlertDialog(
         title: WidgettListtitle(
@@ -22,6 +22,7 @@ class MyDialog {
           ),
         ),
         actions: [
+          actionWidget ??  const SizedBox(),
           WidgetTextButton(
             label: 'Cancel',
             pressFunc: () {

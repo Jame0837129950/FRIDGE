@@ -19,7 +19,7 @@ class WidgetButton extends StatelessWidget {
         onPressed: pressFunc,
         child: WidgetText(
           text: label,
-          textStyle: MyConstant().h2Style(color: Colors.white),
+          textStyle: MyConstant().h2Style(),
         ));
   }
 }

@@ -6,11 +6,13 @@ import 'package:productexpire/controllors/app_controller.dart';
 import 'package:productexpire/models/product_model.dart';
 import 'package:productexpire/states/add_product.dart';
 import 'package:productexpire/utility/my_constant.dart';
+import 'package:productexpire/utility/my_dialog.dart';
 import 'package:productexpire/utility/my_service.dart';
 import 'package:productexpire/widgets/widget_icon_button.dart';
 import 'package:productexpire/widgets/widget_image.dart';
 import 'package:productexpire/widgets/widget_process.dart';
 import 'package:productexpire/widgets/widget_text.dart';
+import 'package:productexpire/widgets/widget_text_button.dart';
 
 class WidgetListProduct extends StatefulWidget {
   const WidgetListProduct({super.key});
@@ -48,7 +50,9 @@ class _WidgetListProductState extends State<WidgetListProduct> {
                       'nonExpireProductModels --> ${appController.nonExprieProductModels.length}');
                   return appController.nonExprieProductModels.isEmpty
                       ? const SizedBox()
-                      : ListView.builder( itemCount: appController.nonExprieProductModels.length,
+                      : ListView.builder(
+                          itemCount:
+                              appController.nonExprieProductModels.length,
                           itemBuilder: (context, index) => displayProduct(
                               boxConstraints: boxConstraints,
                               index: index,
@@ -69,20 +73,21 @@ class _WidgetListProductState extends State<WidgetListProduct> {
     return Column(
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
               width: boxConstraints.maxWidth * 0.5,
-              height: boxConstraints.maxHeight * 0.4,
+              height: boxConstraints.maxWidth * 0.5,
               child: Image.network(
                 appController.nonExprieProductModels[index].urlImage,
                 fit: BoxFit.cover,
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
               width: boxConstraints.maxWidth * 0.5,
-              height: boxConstraints.maxHeight * 0.4,
+              height: boxConstraints.maxWidth * 0.5,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -92,7 +97,8 @@ class _WidgetListProductState extends State<WidgetListProduct> {
                   ),
                   WidgetText(
                     text: MyService().dateToString(
-                        dateTime: appController.nonExprieProductModels[index].timeExpire
+                        dateTime: appController
+                            .nonExprieProductModels[index].timeExpire
                             .toDate()),
                     textStyle: MyConstant().h3Style(color: MyConstant.active),
                   ),
@@ -105,6 +111,34 @@ class _WidgetListProductState extends State<WidgetListProduct> {
                           dateTime: appController
                               .nonExprieProductModels[index].timeReceive
                               .toDate())),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      WidgetIconBitton(
+                        iconData: Icons.delete_forever,
+                        pressFunc: () {
+                          MyDialog(context: context).normalDialog(
+                              title: 'Delete ?',
+                              subTitle: 'Please Confirm Delete',
+                              actionWidget: WidgetTextButton(
+                                label: 'Confirm Delete',
+                                pressFunc: () async {
+                                  print(
+                                      'delete --> ${appController.docIdNonExpireProducts[index]}');
+                                  MyService()
+                                      .processDeleteProduct(
+                                          docIdProductDelete: appController
+                                              .docIdNonExpireProducts[index])
+                                      .then((value) {
+                                        Get.back();
+                                      });
+                                },
+                              ));
+                        },
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -125,7 +159,7 @@ class _WidgetListProductState extends State<WidgetListProduct> {
         iconData: Icons.add_box,
         pressFunc: () {
           Get.to(AddProduct(docIdUser: user!.uid))?.then((value) {
-           MyService().readAllProductExpire();
+            MyService().readAllProductExpire();
           });
         },
         size: 48,
